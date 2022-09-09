@@ -1,4 +1,4 @@
-# Hi there 👋
+# Hi friends 👋
 
  Hey, I'm Arunlal PP
 
