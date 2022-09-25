@@ -1,6 +1,6 @@
 # Hi friends 👋
 
- Hey, I'm Arunlal PP
+ Hi, I'm Arunlal PP
 
 <br>
 <br>
