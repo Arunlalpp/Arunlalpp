@@ -2,7 +2,6 @@
 
  Hey, I'm Arunlal PP
 
-# 💫 About Me:
 Front-end developer<br>React | React-native<br>
 
 
