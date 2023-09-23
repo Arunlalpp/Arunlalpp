@@ -61,7 +61,7 @@ Front-end developer<br>React | React-native<br>
 
 
 
-![](https://github-readme-stats.vercel.app/api?username=arunlalpp&theme=dark&hide_border=false&include_all_commits=false&count_private=false)<br/>
+![](https://github-readme-stats.vercel.app/api?username=arunlalpp&theme=dark&show_icons=true&hide=&count_private=true&title_color=4AB197&text_color=ffffff&icon_color=4AB197&bg_color=1A2B34&hide_border=true&show_icons=true&hide_border=true&include_all_commits=false&count_private=false)<br/>
 ![](https://github-readme-streak-stats.herokuapp.com/?user=arunlalpp&theme=dark&hide_border=false)<br/>
 ![](https://github-readme-stats.vercel.app/api/top-langs/?username=arunlalpp&theme=dark&hide_border=false&include_all_commits=false&count_private=false&layout=compact)
 
