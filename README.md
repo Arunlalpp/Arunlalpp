@@ -2,23 +2,6 @@
 
  Hey, I'm Arunlal PP
 
-<br>
-<hr>
-<br>
-<div>
-  <a href="https://github.com/Arunlalpp">
-  <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Arunlalpp&layout=compact&langs_count=7&theme=light"/>
-</div>
-<br>
-<hr>
-<br>
-
-![Arunlalpp](https://github-readme-streak-stats.herokuapp.com/?user=Arunlalpp&theme=dark)
-<br>
-<hr>
-<br>
-
-
 # 💫 About Me:
 Front-end developer<br>React | React-native<br>
 
