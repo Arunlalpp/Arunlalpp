@@ -49,8 +49,8 @@ Front-end developer<br>React | React-native<br>
 # 📊 GitHub Stats:
 
 ![](https://github-readme-stats.vercel.app/api?username=arunlalpp&count_icons=true&hide=&count_private=true&title_color=4AB197&text_color=ffffff&icon_color=4AB197&bg_color=1A2B34&hide_border=true&show_icons=true&hide_border=true&include_all_commits=false&count_private=false)<br/>
-![](https://github-readme-streak-stats.herokuapp.com/?user=arunlalpp&theme=dark&hide_border=false)<br/>
-![](https://github-readme-stats.vercel.app/api/top-langs/?username=arunlalpp&theme=dark&hide_border=false&include_all_commits=false&count_private=false&layout=compact)
+![](https://github-readme-streak-stats.herokuapp.com/?user=arunlalpp&theme=dark&&title_color=4AB197&text_color=ffffff&icon_color=4AB197&bg_color=1A2B34&hide_border=true&show_icons=true&hide_border=true)<br/>
+![](https://github-readme-stats.vercel.app/api/top-langs/?username=arunlalpp&theme=dark&hide_border=true&include_all_commits=false&count_private=false&layout=compact)
 
 ## 🏆 GitHub Trophies
 ![](https://github-profile-trophy.vercel.app/?username=arunlalpp&theme=onestar&no-frame=true&no-bg=false&margin-w=4)
