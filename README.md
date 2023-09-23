@@ -38,7 +38,7 @@
 <hr>
 <br>
 
-![Arunlalpp](https://github-readme-streak-stats.herokuapp.com/?user=Arunlalpp&theme=light)
+![Arunlalpp](https://github-readme-streak-stats.herokuapp.com/?user=Arunlalpp&theme=dark)
 <br>
 <hr>
 <br>
