@@ -38,7 +38,7 @@
 -->
  Hey, I'm Arunlal PP
 
-Front-end developer<br>React | React-native<br>
+Front-end developer<br>React | React-native<br> | Nuxt<br>
 
 
 ## 🌐 Socials:
