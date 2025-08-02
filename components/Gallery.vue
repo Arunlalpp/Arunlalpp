@@ -7,6 +7,10 @@
                     v-for="(item, index) in visibleImages" 
                     :key="item.id + '-' + index" 
                     class="grid-item"
+                    :style="{ 
+                        width: item.dimensions?.width + 'px',
+                        height: item.height + 'px'
+                    }"
                     @click="openModal(item)"
                 >
                     <div class="media-container">
@@ -67,6 +71,17 @@ let currentIndex = 0;
 let Masonry = null;
 let loadedCount = 0;
 
+// Generate varied dimensions for natural masonry layout
+const generateDimensions = () => {
+  const widths = [300, 350, 280, 320, 400, 250, 380];
+  const aspectRatios = [0.75, 1.2, 0.9, 1.5, 0.6, 1.1, 1.3, 0.8, 1.4];
+  
+  return {
+    width: widths[Math.floor(Math.random() * widths.length)],
+    aspectRatio: aspectRatios[Math.floor(Math.random() * aspectRatios.length)]
+  };
+};
+
 const openModal = (item) => {
     selected.value = item;
 };
@@ -81,12 +96,13 @@ const loadMasonry = async () => {
         if (grid.value) {
             masonryInstance.value = new Masonry(grid.value, {
                 itemSelector: '.grid-item',
-                columnWidth: '.grid-sizer',
-                percentPosition: true,
-                transitionDuration: '0.3s',
-                gutter: 16,
+                columnWidth: 250,
+                percentPosition: false,
+                transitionDuration: '0.4s',
+                gutter: 20,
                 fitWidth: true,
-                horizontalOrder: true
+                horizontalOrder: false,
+                stamp: '.grid-sizer'
             });
         }
     }
@@ -108,10 +124,11 @@ const handleMediaLoad = (event) => {
     if (el && !el.classList.contains('loaded')) {
         el.classList.add('loaded');
         
-        // Trigger animation after a short delay
+        // Random animation delay for more natural effect
+        const randomDelay = Math.random() * 300 + 50;
         setTimeout(() => {
             el.classList.add('visible');
-        }, 100);
+        }, randomDelay);
 
         if (masonryInstance.value) {
             masonryInstance.value.layout();
@@ -129,18 +146,31 @@ const loadMore = async () => {
     
     isLoading.value = true;
     
-    const nextBatch = images.slice(currentIndex, currentIndex + batchSize);
+    const nextBatch = images.slice(currentIndex, currentIndex + batchSize).map(item => {
+        const dimensions = generateDimensions();
+        return {
+            ...item,
+            dimensions,
+            height: Math.round(dimensions.width / dimensions.aspectRatio)
+        };
+    });
+    
     visibleImages.value.push(...nextBatch);
     currentIndex += batchSize;
 
     await nextTick();
 
-    // Add animation classes to new items
+    // Add varied animation classes to new items
     const newItems = grid.value?.querySelectorAll('.grid-item:not(.loaded)');
     newItems?.forEach((el, index) => {
-        setTimeout(() => {
-            el.style.animationDelay = `${index * 0.1}s`;
-        }, 50);
+        const randomDirection = Math.random() > 0.5 ? 1 : -1;
+        const randomRotation = (Math.random() - 0.5) * 10;
+        const randomScale = 0.7 + Math.random() * 0.2;
+        
+        el.style.setProperty('--random-direction', randomDirection);
+        el.style.setProperty('--random-rotation', `${randomRotation}deg`);
+        el.style.setProperty('--random-scale', randomScale);
+        el.style.animationDelay = `${Math.random() * 0.5}s`;
     });
 
     layoutMasonry();
@@ -150,7 +180,14 @@ const hasMore = computed(() => currentIndex < images.length);
 
 onMounted(async () => {
     if (process.client) {
-        const firstBatch = images.slice(0, batchSize);
+        const firstBatch = images.slice(0, batchSize).map(item => {
+            const dimensions = generateDimensions();
+            return {
+                ...item,
+                dimensions,
+                height: Math.round(dimensions.width / dimensions.aspectRatio)
+            };
+        });
         visibleImages.value = firstBatch;
         currentIndex = batchSize;
         isLoading.value = true;
@@ -189,53 +226,78 @@ onMounted(async () => {
     }
 
     .grid-sizer {
-        width: 350px;
+        width: 250px;
+        height: 0;
         
         @media (max-width: 1200px) {
-            width: calc(50% - 8px);
+            width: 200px;
         }
         
         @media (max-width: 768px) {
-            width: calc(50% - 8px);
+            width: calc(50% - 10px);
         }
         
         @media (max-width: 480px) {
-            width: 100%;
+            width: calc(100% - 20px);
         }
     }
 
     .grid-item {
-        width: 350px;
-        margin-bottom: 16px;
-        border-radius: 12px;
+        margin-bottom: 20px;
+        border-radius: 16px;
         cursor: pointer;
         background-color: #fff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         overflow: hidden;
         opacity: 0;
-        transform: translateY(30px) scale(0.95);
-        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        
-        @media (max-width: 1200px) {
-            width: calc(50% - 8px);
-        }
+        transform: translateY(calc(40px * var(--random-direction, 1))) 
+                   rotate(var(--random-rotation, 0deg)) 
+                   scale(var(--random-scale, 0.8));
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
         
         @media (max-width: 768px) {
-            width: calc(50% - 8px);
+            width: calc(50% - 10px) !important;
+            height: auto !important;
         }
         
         @media (max-width: 480px) {
-            width: 100%;
+            width: calc(100% - 20px) !important;
+            height: auto !important;
         }
 
         &.visible {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0) rotate(0deg) scale(1);
         }
 
         &:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px) scale(1.03) rotate(1deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+            z-index: 2;
+        }
+
+        &:nth-child(even) {
+            animation-direction: reverse;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                rgba(102, 126, 234, 0.1) 0%, 
+                rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        &:hover::before {
+            opacity: 1;
         }
 
         .media-container {
@@ -247,32 +309,50 @@ onMounted(async () => {
 
         .media {
             width: 100%;
-            height: auto;
+            height: 100%;
             display: block;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.4s ease;
+            position: relative;
+            z-index: 2;
             
             &.image {
-                aspect-ratio: 4/5;
+                filter: brightness(1.02) contrast(1.05);
             }
             
             &.video {
-                aspect-ratio: 4/5;
+                filter: brightness(1.02) contrast(1.05);
             }
         }
 
         .caption-container {
-            padding: 1rem;
-            background: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 1rem 1rem;
+            background: linear-gradient(to top, 
+                rgba(0, 0, 0, 0.8) 0%, 
+                rgba(0, 0, 0, 0.4) 50%,
+                transparent 100%);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 3;
+        }
+
+        &:hover .caption-container {
+            transform: translateY(0);
         }
 
         .caption {
             margin: 0;
-            font-size: 0.9rem;
-            color: #333;
-            font-weight: 500;
-            line-height: 1.4;
-            text-align: center;
+            font-size: 0.85rem;
+            color: white;
+            font-weight: 600;
+            line-height: 1.3;
+            text-align: left;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 0.5px;
         }
     }
 
@@ -322,14 +402,54 @@ onMounted(async () => {
         }
     }
 
-    // Staggered animation for grid items
-    .grid-item {
-        &:nth-child(1) { animation-delay: 0.1s; }
-        &:nth-child(2) { animation-delay: 0.2s; }
-        &:nth-child(3) { animation-delay: 0.3s; }
-        &:nth-child(4) { animation-delay: 0.4s; }
-        &:nth-child(5) { animation-delay: 0.5s; }
-        &:nth-child(6) { animation-delay: 0.6s; }
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-5px) rotate(1deg);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.02);
+        }
+    }
+
+    @keyframes slideInRotate {
+        0% {
+            transform: translateY(50px) rotate(10deg) scale(0.7);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0) rotate(0deg) scale(1);
+            opacity: 1;
+        }
+    }
+
+    // Add subtle floating animation to loaded items
+    .grid-item.visible {
+        animation: float 6s ease-in-out infinite;
+        
+        &:nth-child(odd) {
+            animation-delay: 0s;
+            animation-duration: 8s;
+        }
+        
+        &:nth-child(even) {
+            animation-delay: 2s;
+            animation-duration: 6s;
+            animation-direction: reverse;
+        }
+
+        &:nth-child(3n) {
+            animation: pulse 4s ease-in-out infinite;
+            animation-delay: 1s;
+        }
     }
 }
 </style>
