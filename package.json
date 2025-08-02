@@ -1,0 +1,16 @@
+{
+  "name": "footwear-gallery",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@nuxt/devtools": "^2.6.2",
+    "masonry-layout": "^4.2.2",
+    "nuxt": "^4.0.2",
+    "sass": "^1.89.2"
+  }
+}
