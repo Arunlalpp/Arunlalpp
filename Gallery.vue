@@ -5,10 +5,10 @@
                 <div class="grid-sizer"></div>
                 <div v-for="(item, index) in visibleImages" :key="item.id + '-' + index" class="gallery-item" :class="[
                     { 'is-loading': !item.loaded, 'is-loaded': item.loaded },
-                    item.sizeType ? `size-${item.sizeType}` : ''
+                    item.sizeType ? `size-${item.sizeType}` : '',
+                    `animate-${item.animationIndex}`
                 ]" :style="{
-                    '--animation-delay': `${item.delay || 0}s`,
-                    '--item-height': item.height ? `${item.height}px` : 'auto'
+                    '--animation-delay': `${item.delay || 0}s`
                 }" @click="openModal(item)">
                     <div class="media-container">
                         <template v-if="item.video">
@@ -69,6 +69,7 @@ let Masonry = null;
 const isLoading = ref(false);
 const route = useRoute();
 const isInitialized = ref(false);
+let animationCounter = 0;
 
 const openModal = (item) => {
     selected.value = item;
@@ -98,17 +99,10 @@ const loadMasonry = async () => {
             columnWidth: '.grid-sizer',
             gutter: 10,
             fitWidth: true,
-            transitionDuration: '0.6s',
-            stagger: 30,
-            resize: true,
+            transitionDuration: '0.4s',
         });
 
-        // Add entrance animations for existing items
-        const items = grid.value.querySelectorAll('.gallery-item');
-        items.forEach((item, index) => {
-            item.style.setProperty('--animation-delay', `${index * 0.1}s`);
-        });
-
+        // Initial layout
         setTimeout(() => {
             if (masonryInstance.value) {
                 masonryInstance.value.layout();
@@ -123,23 +117,24 @@ const loadMasonry = async () => {
 const handleMediaLoad = (item) => {
     item.loaded = true;
     
-    // Add a slight delay for smoother animation
-    setTimeout(() => {
+    // Relayout masonry when media loads
+    nextTick(() => {
         if (masonryInstance.value) {
             masonryInstance.value.layout();
         }
-    }, 50);
+    });
 };
 
 const loadMore = async () => {
     isLoading.value = true;
 
-    // Create next batch with staggered animation delays
+    // Create next batch with proper animation setup
     const nextBatch = images.slice(currentIndex, currentIndex + batchSize).map((item, idx) => ({
         ...item,
         height: getRandomHeight(200, 450),
         loaded: false,
-        delay: (idx * 0.15).toFixed(2), // Increased stagger time for smoother effect
+        delay: (idx * 0.1).toFixed(2),
+        animationIndex: animationCounter++
     }));
 
     // Add items to visible array
@@ -148,38 +143,22 @@ const loadMore = async () => {
 
     await nextTick();
 
-    // Get newly added items and apply entrance animations
-    const allItems = grid.value.querySelectorAll('.gallery-item');
-    const newItems = Array.from(allItems).slice(-nextBatch.length);
-    
-    // Apply masonry to new items
-    if (masonryInstance.value && newItems.length > 0) {
-        // Temporarily hide new items for smoother entrance
-        newItems.forEach((el, idx) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px) scale(0.9)';
-        });
-
-        masonryInstance.value.appended(newItems);
+    // Let masonry handle the new items
+    if (masonryInstance.value) {
+        const newItems = grid.value.querySelectorAll('.gallery-item:not(.masonry-positioned)');
+        newItems.forEach(item => item.classList.add('masonry-positioned'));
         
-        // Layout and then animate in
-        setTimeout(() => {
-            masonryInstance.value?.layout();
-            
-            // Animate new items in with stagger
-            newItems.forEach((el, idx) => {
-                setTimeout(() => {
-                    el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0) scale(1)';
-                }, idx * 100); // 100ms stagger between items
-            });
-        }, 50);
+        if (newItems.length > 0) {
+            masonryInstance.value.appended([...newItems]);
+            setTimeout(() => {
+                masonryInstance.value?.layout();
+            }, 50);
+        }
     }
 
     setTimeout(() => {
         isLoading.value = false;
-    }, 800); // Increased to match animation duration
+    }, 500);
 };
 
 const hasMore = computed(() => currentIndex < images.length);
@@ -189,13 +168,15 @@ const initializeGallery = async () => {
     visibleImages.value = [];
     currentIndex = 0;
     isInitialized.value = false;
+    animationCounter = 0;
 
     // Initialize with first batch
     visibleImages.value = images.slice(0, batchSize).map((item, index) => ({
         ...item,
         height: getRandomHeight(),
         loaded: false,
-        delay: (index * 0.1).toFixed(2) // Initial stagger
+        delay: (index * 0.1).toFixed(2),
+        animationIndex: animationCounter++
     }));
 
     currentIndex = batchSize;
@@ -209,20 +190,15 @@ const initializeGallery = async () => {
 onMounted(async () => {
     await initializeGallery();
 
-    // Handle window resize with debounce
-    let resizeTimeout;
+    // Handle window resize
     const handleResize = () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (masonryInstance.value) {
-                masonryInstance.value.layout();
-            }
-        }, 100);
+        if (masonryInstance.value) {
+            masonryInstance.value.layout();
+        }
     };
 
     window.addEventListener('resize', handleResize);
 
-    // Cleanup
     onUnmounted(() => {
         window.removeEventListener('resize', handleResize);
         if (masonryInstance.value) {
@@ -231,7 +207,7 @@ onMounted(async () => {
     });
 });
 
-// Handle route changes to reinitialize gallery
+// Handle route changes
 watch(() => route.path, async (newPath, oldPath) => {
     if (newPath !== oldPath) {
         setTimeout(async () => {
@@ -240,7 +216,6 @@ watch(() => route.path, async (newPath, oldPath) => {
     }
 }, { immediate: false });
 
-// Force reinitialize when component becomes visible
 onActivated(async () => {
     if (!isInitialized.value) {
         await initializeGallery();
@@ -280,33 +255,19 @@ onActivated(async () => {
         cursor: pointer;
         background: #fff;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        transform: translateY(0);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Initial state - hidden */
         opacity: 0;
-        animation: masonryFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        transform: translateY(20px) scale(0.95);
+        
+        /* Animation trigger */
+        animation: masonrySlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         animation-delay: var(--animation-delay, 0s);
 
-        &.is-loading {
-            .media-container .media {
-                opacity: 0;
-            }
-        }
-
-        &.is-loaded {
-            .media-container .media {
-                opacity: 1;
-                animation: mediaFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            }
-            
-            .media-loading {
-                opacity: 0;
-                pointer-events: none;
-            }
-        }
-
         &:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             z-index: 10;
 
             .media {
@@ -317,7 +278,7 @@ onActivated(async () => {
         .media-container {
             position: relative;
             width: 100%;
-            height: var(--item-height, 250px);
+            height: 250px;
             overflow: hidden;
             background: #f8f9fa;
 
@@ -325,7 +286,7 @@ onActivated(async () => {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 display: block;
                 opacity: 0;
             }
@@ -336,20 +297,19 @@ onActivated(async () => {
                 left: 0;
                 right: 0;
                 bottom: 0;
+                background: #f8f9fa;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #f8f9fa;
-                transition: opacity 0.3s ease;
 
                 .loading-shimmer {
                     width: 100%;
                     height: 100%;
                     background: linear-gradient(
                         90deg,
-                        transparent,
-                        rgba(255, 255, 255, 0.4),
-                        transparent
+                        #f8f9fa,
+                        #e9ecef,
+                        #f8f9fa
                     );
                     background-size: 200% 100%;
                     animation: shimmer 1.5s infinite;
@@ -357,11 +317,21 @@ onActivated(async () => {
             }
         }
 
+        &.is-loaded {
+            .media {
+                opacity: 1;
+                animation: mediaFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }
+            
+            .media-loading {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+
         .item-info {
             padding: 0.8rem;
             background: #fff;
-            transform: translateY(0);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
             .item-description {
                 font-size: 13px;
@@ -370,7 +340,7 @@ onActivated(async () => {
                 margin: 0;
                 text-align: center;
                 opacity: 0;
-                animation: textFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+                animation: textSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
             }
         }
     }
@@ -378,14 +348,12 @@ onActivated(async () => {
     .load-more-container {
         text-align: center;
         margin-top: 3rem;
-        opacity: 0;
-        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
 
         .load-more-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 1.2rem 2.5rem;
+            padding: 1rem 2rem;
             background: linear-gradient(135deg, #3565ce 0%, #5b7cfa 100%);
             color: #fff;
             border: none;
@@ -393,38 +361,16 @@ onActivated(async () => {
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(53, 101, 206, 0.3);
-            position: relative;
-            overflow: hidden;
-
-            &::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255, 255, 255, 0.2),
-                    transparent
-                );
-                transition: left 0.5s ease;
-            }
 
             &:hover {
-                transform: translateY(-3px) scale(1.05);
+                transform: translateY(-2px);
                 box-shadow: 0 8px 30px rgba(53, 101, 206, 0.4);
-
-                &::before {
-                    left: 100%;
-                }
             }
 
             &:active {
-                transform: translateY(-1px) scale(1.02);
+                transform: translateY(0);
             }
         }
     }
@@ -432,8 +378,6 @@ onActivated(async () => {
     .loading-container {
         text-align: center;
         margin: 3rem 0;
-        opacity: 0;
-        animation: fadeIn 0.3s ease forwards;
 
         .loading-spinner {
             display: flex;
@@ -453,17 +397,16 @@ onActivated(async () => {
             p {
                 color: #666;
                 font-size: 1rem;
-                animation: pulse 2s ease-in-out infinite;
             }
         }
     }
 }
 
 /* Keyframe Animations */
-@keyframes masonryFadeIn {
+@keyframes masonrySlideIn {
     0% {
         opacity: 0;
-        transform: translateY(30px) scale(0.9);
+        transform: translateY(20px) scale(0.95);
     }
     100% {
         opacity: 1;
@@ -474,7 +417,7 @@ onActivated(async () => {
 @keyframes mediaFadeIn {
     0% {
         opacity: 0;
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
     100% {
         opacity: 1;
@@ -482,7 +425,7 @@ onActivated(async () => {
     }
 }
 
-@keyframes textFadeIn {
+@keyframes textSlideIn {
     0% {
         opacity: 0;
         transform: translateY(10px);
@@ -490,26 +433,6 @@ onActivated(async () => {
     100% {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes fadeInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
     }
 }
 
@@ -531,27 +454,14 @@ onActivated(async () => {
     }
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 0.6;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
-/* Reduced motion preferences */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
     .gallery-item {
-        animation-duration: 0.3s;
+        animation-duration: 0.2s;
     }
     
     .gallery-item:hover {
         transform: translateY(-2px);
-    }
-    
-    .media {
-        transition-duration: 0.2s;
     }
     
     .loading-shimmer {
