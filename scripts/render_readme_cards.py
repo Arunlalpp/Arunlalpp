@@ -107,7 +107,7 @@ def stats(d):
     items = [
         ("Public repos", d["repos"]),
         (f"Contributions ({date.today().year - 1}–{date.today().year % 100:02d})", d["contributions_year"]),
-        ("Current streak", f'{d["current_streak"]} days'),
+        ("Current streak", f'{d["current_streak"]} day' + ("" if d["current_streak"] == 1 else "s")),
         ("Followers", d["followers"]),
     ]
     rows = []
