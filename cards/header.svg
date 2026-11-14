@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="218" viewBox="0 0 840 218" role="img"><style>
+    text { font-family: 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif; }
+    .fade { animation: fade .7s ease-out both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    
+    .tag { opacity: 0; animation: cycle 9.600000000000001s infinite; }
+    @keyframes cycle {
+      0% { opacity: 0; transform: translateY(8px); }
+      4%, 29.3% { opacity: 1; transform: none; }
+      33.3%, 100% { opacity: 0; transform: translateY(-8px); }
+    }
+    .bar { transform-origin: 40px 0; animation: grow 1.2s cubic-bezier(.2,.8,.2,1) .3s both; }
+    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .chip { animation: fade .5s ease-out both; }
+    .glow { animation: pulse 4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: .35; } 50% { opacity: .7; } }
+    </style><rect x="0.5" y="0.5" width="839" height="217" rx="14" fill="#0f1115" stroke="#262a33"/>
+    <defs><radialGradient id="g" cx="85%" cy="100%" r="60%">
+      <stop offset="0" stop-color="#f4a443" stop-opacity=".35"/><stop offset="1" stop-color="#f4a443" stop-opacity="0"/>
+    </radialGradient></defs>
+    <rect class="glow" x="1" y="1" width="838" height="216" rx="14" fill="url(#g)"/>
+    <text class="fade" x="40" y="62" font-size="15" font-weight="700" letter-spacing="2" fill="#f4a443">HI, I'M</text>
+    <text class="fade" x="40" y="96" font-size="34" font-weight="800" fill="#e8e6e3" style="animation-delay:.15s">Arunlal PP</text>
+    <text class="fade" x="250" y="96" font-size="16" fill="#9a968f" style="animation-delay:.3s">Frontend Developer · Kerala, India</text>
+    <rect class="bar" x="40" y="136" width="120" height="3" rx="1.5" fill="#f4a443"/>
+    <text class="tag" x="40" y="120" font-size="17" fill="#9a968f" style="animation-delay:0.0s">Building fast, responsive interfaces with React &amp; Next.js</text><text class="tag" x="40" y="120" font-size="17" fill="#9a968f" style="animation-delay:3.2s">Shipping Nuxt / Vue apps at Softius Technologies</text><text class="tag" x="40" y="120" font-size="17" fill="#9a968f" style="animation-delay:6.4s">TypeScript · Tailwind · React Native · GSAP</text>
+    <g class="chip" style="animation-delay:0.60s"><rect x="40" y="154" width="54" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="67" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">React</text></g><g class="chip" style="animation-delay:0.72s"><rect x="102.0" y="154" width="69" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="137" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">Next.js</text></g><g class="chip" style="animation-delay:0.84s"><rect x="179.2" y="154" width="39" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="199" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">Vue</text></g><g class="chip" style="animation-delay:0.96s"><rect x="226.0" y="154" width="46" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="249" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">Nuxt</text></g><g class="chip" style="animation-delay:1.08s"><rect x="280.4" y="154" width="92" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="326" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">TypeScript</text></g><g class="chip" style="animation-delay:1.20s"><rect x="380.4" y="154" width="77" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="419" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">Tailwind</text></g><g class="chip" style="animation-delay:1.32s"><rect x="465.2" y="154" width="107" height="28" rx="14" fill="#1a1d24" stroke="#262a33"/><text x="519" y="173" font-size="13" fill="#e8e6e3" text-anchor="middle">React Native</text></g>
+    </svg>
